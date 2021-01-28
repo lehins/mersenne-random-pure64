@@ -1,4 +1,8 @@
-{-# LANGUAGE CPP, ForeignFunctionInterface #-}
+{-# LANGUAGE CPP #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE ForeignFunctionInterface #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 --------------------------------------------------------------------
 -- |
@@ -51,6 +55,9 @@ import Data.Int
 import Data.Time.Clock
 import Data.Time.Calendar
 import System.CPUTime
+#if MIN_VERSION_random(1, 3, 0)
+import GHC.TypeLits
+#endif
 
 -- | Create a PureMT generator from a 'Word64' seed.
 pureMT :: Word64 -> PureMT
@@ -79,6 +86,9 @@ newPureMT = do
 -- RandomGen. However, it doesn't support 'split' yet.
 
 instance RandomGen PureMT where
+#if MIN_VERSION_random(1, 3, 0)
+   type Splittable PureMT = TypeError ('Text "PureMT is not a splittable PRNG")
+#endif
    next = randomInt
    split = error "System.Random.Mersenne.Pure: unable to split the mersenne twister"
 #if MIN_VERSION_random(1, 2, 0)
